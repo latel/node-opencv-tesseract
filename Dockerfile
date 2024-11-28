@@ -21,15 +21,13 @@ RUN wget -q https://github.com/intel/intel-graphics-compiler/releases/download/i
     wget -q https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/intel-opencl-icd-dbgsym_24.39.31294.12_amd64.ddeb && \
     wget -q https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/intel-opencl-icd_24.39.31294.12_amd64.deb && \
     wget -q https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/libigdgmm12_22.5.2_amd64.deb
-RUN apt install -y install ocl-icd-libopencl1
+RUN apt install -y ocl-icd-libopencl1
 RUN dpkg -i *.deb
-
-RUN clinfo
 
 # 构建 OpenCV
 WORKDIR /build/opencv
-RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip && unzip opencv.zip && rm opencv.zip
-RUN wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.x.zip && unzip opencv_contrib.zip && rm opencv_contrib.zip
+RUN wget -qO opencv.zip https://github.com/opencv/opencv/archive/4.x.zip && unzip opencv.zip && rm opencv.zip
+RUN wget -qO opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.x.zip && unzip opencv_contrib.zip && rm opencv_contrib.zip
 WORKDIR /build/opencv/build
 RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.x/modules \
           -DWITH_OPENCL=ON \
