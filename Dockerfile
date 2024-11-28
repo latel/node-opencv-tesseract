@@ -21,6 +21,7 @@ RUN wget -q https://github.com/intel/intel-graphics-compiler/releases/download/i
     wget -q https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/intel-opencl-icd-dbgsym_24.39.31294.12_amd64.ddeb && \
     wget -q https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/intel-opencl-icd_24.39.31294.12_amd64.deb && \
     wget -q https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/libigdgmm12_22.5.2_amd64.deb
+RUN apt install -y install ocl-icd-libopencl1
 RUN dpkg -i *.deb
 
 RUN clinfo
