@@ -12,6 +12,19 @@ RUN apt-get install -y \
     cmake \
     wget
 
+# nodejs 22.x
+WORKDIR /build/node
+# RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+#     apt-get install -y nodejs
+# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash && \
+#     export NVM_DIR="$HOME/.nvm" && \
+#     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+#     nvm install 22
+# ENV NVM_DIR="$HOME/.nvm"
+ADD node-v22.11.0-linux-x64.tar.xz /build/node
+RUN cp -R /build/node/node-v22.11.0-linux-x64/* /usr/
+RUN rm -rf /build/node
+
 WORKDIR /build/intel_opencl
 RUN wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17791.9/intel-igc-core_1.0.17791.9_amd64.deb && \
     wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-1.0.17791.9/intel-igc-opencl_1.0.17791.9_amd64.deb && \
@@ -22,6 +35,7 @@ RUN wget https://github.com/intel/intel-graphics-compiler/releases/download/igc-
     wget https://github.com/intel/compute-runtime/releases/download/24.39.31294.12/libigdgmm12_22.5.2_amd64.deb
 RUN apt-get install -y ocl-icd-libopencl1
 RUN dpkg -i *.deb
+RUN rm -rf /build/intel_opencl
 
 WORKDIR /build/openvino
 RUN apt-get install -y gnupg
@@ -30,11 +44,7 @@ RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 RUN echo "deb https://apt.repos.intel.com/openvino/2024 ubuntu24 main" | tee /etc/apt/sources.list.d/intel-openvino-2024.list
 RUN apt-get update
 RUN apt-get install -y openvino-2024.5.0
-
-# nodejs 22.x
-WORKDIR /build/node
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs
+RUN rm -rf /build/openvino
 
 # build OpenCV
 WORKDIR /build/opencv
@@ -54,16 +64,21 @@ RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.x/modules \
           -DBUILD_opencv_js=ON \
           -DWITH_FFMPEG=ON \
           -DWITH_TBB=ON \
+          -DOPENCV_GENERATE_PKGCONFIG=ON \
     ../opencv-4.x
 RUN cmake --build .
 RUN make install
+RUN rm -rf /build/opencv
 
 ENV OPENCV4NODEJS_DISABLE_AUTOBUILD=1
-ENV OPENCV_INCLUDE_DIR=/build/opencv-4.x/include
-ENV OPENCV_LIB_DIR=/build/build/lib
+ENV OPENCV_INCLUDE_DIR=/usr/local/include/opencv4/
+ENV OPENCV_LIB_DIR=/usr/local/lib/
+ENV OPENCV_BIN_DIR=/usr/local/bin/
+ENV OPENCV4NODES_DEBUG_REQUIRE=1
+
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN npm cache clean --force
 
 ADD src /app/
 WORKDIR /app
-RUN npm i
-CMD ["npm", "start"]
+CMD ["npm i && npm start"]
