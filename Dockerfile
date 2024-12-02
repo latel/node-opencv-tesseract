@@ -6,7 +6,8 @@ RUN apt-get update
 RUN apt-get install -y \
     tesseract-ocr \
     cmake \
-    wget
+    wget \
+    ffmpeg
 
 # nodejs 22.x
 WORKDIR /build/node
@@ -67,7 +68,6 @@ ENV OPENCV4NODES_DEBUG_REQUIRE=1
 # ENV DEBUG=*
 ENV NPM_CONFIG_LOGLEVEL=silly
 
-RUN apt-get install -y ffmpeg
 # RUN apt-get install -y build-essential git
 # RUN apt-get install -y tree vim
 # RUN npm i -g node-gyp
